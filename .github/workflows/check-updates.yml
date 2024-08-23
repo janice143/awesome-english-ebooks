@@ -22,7 +22,7 @@ jobs:
         id: check_updates
         run: |
           git fetch upstream
-          NEW_COMMITS=$(git rev-list HEAD..upstream/main --count)
+          NEW_COMMITS=$(git rev-list HEAD..upstream/master --count)
           echo "::set-output name=new_commits::$NEW_COMMITS"
       
       - name: Sync with Upstream
