@@ -27,23 +27,22 @@ jobs:
           echo "::set-output name=new_commits::$NEW_COMMITS"
 
       - name: Sync with Upstream
-          if: steps.check_updates.outputs.new_commits != '0'
-          run: |
-            set -e  # 遇到错误时停止执行
-            git merge upstream/master --allow-unrelated-histories --strategy-option theirs || (echo "Merge failed, rolling back" && git merge --abort)
-            git push origin master
+        if: steps.check_updates.outputs.new_commits != '0'
+        run: |
+          set -e  # 遇到错误时停止执行
+          git merge upstream/master --allow-unrelated-histories --strategy-option theirs || (echo "Merge failed, rolling back" && git merge --abort)
+          git push origin master
 
       - name: Send Email if Updates Found
-          if: steps.check_updates.outputs.new_commits != '0'
-          uses: devellany/send-mail@v1.0.2
-          with:
-            host: 'smtp.qq.com'
-            port: 465
-            account: ${{ secrets.EMAIL }}
-            password: ${{ secrets.APP_PASSWORD }}
-            sender: GITHUB
-            from: ${{ secrets.EMAIL }}
-            to: ${{ secrets.TARGET_EMAIL }}
-            subject: "Repository Updates"
-            body: "Found ${{ steps.check_updates.outputs.new_commits }} new updates in the repository."
-          
+        if: steps.check_updates.outputs.new_commits != '0'
+        uses: devellany/send-mail@v1.0.2
+        with:
+          host: 'smtp.qq.com'
+          port: 465
+          account: ${{ secrets.EMAIL }}
+          password: ${{ secrets.APP_PASSWORD }}
+          sender: GITHUB
+          from: ${{ secrets.EMAIL }}
+          to: ${{ secrets.TARGET_EMAIL }}
+          subject: 'Repository Updates'
+          body: 'Found ${{ steps.check_updates.outputs.new_commits }} new updates in the repository.'
