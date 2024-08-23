@@ -13,9 +13,9 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
 
-      - name: Set Upstream Repository
+      - name: Set Upstream Repository if not exists
         run: |
-          git remote add upstream https://github.com/hehonghui/awesome-english-ebooks.git
+          git remote | grep upstream || git remote add upstream https://github.com/hehonghui/awesome-english-ebooks.git
           git fetch upstream
 
       - name: Check for New Commits
