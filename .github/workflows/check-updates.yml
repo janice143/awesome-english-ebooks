@@ -2,8 +2,8 @@ name: Check for Upstream Updates and Send Email
 
 on:
   schedule:
-    - cron: '0 10 * * 0' # 每周天下午18点中国时间运行
-  workflow_dispatch: # 手动触发
+    - cron: '0 10 * * 0'  # 每周天下午18点中国时间运行
+  workflow_dispatch:  # 手动触发
 
 jobs:
   check-updates:
@@ -13,7 +13,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v2
         with:
-          fetch-depth: 1 # 只拉取最新的提交
+          fetch-depth: 1  # 只拉取最新的提交
 
       - name: Set Upstream Repository if not exists
         run: |
@@ -26,6 +26,11 @@ jobs:
           NEW_COMMITS=$(git rev-list HEAD..upstream/master --count)
           echo "::set-output name=new_commits::$NEW_COMMITS"
 
+      - name: Configure Git Identity
+        run: |
+          git config --global user.email ${{ secrets.GIT_EMAIL }}  # 设置提交者邮箱
+          git config --global user.name ${{ secrets.GIT_NAME }} # 设置提交者名称
+
       - name: Sync with Upstream
         if: steps.check_updates.outputs.new_commits != '0'
         run: |
@@ -37,12 +42,12 @@ jobs:
         if: steps.check_updates.outputs.new_commits != '0'
         uses: devellany/send-mail@v1.0.2
         with:
-          host: 'smtp.qq.com'
-          port: 465
-          account: ${{ secrets.EMAIL }}
-          password: ${{ secrets.APP_PASSWORD }}
-          sender: GITHUB
-          from: ${{ secrets.EMAIL }}
-          to: ${{ secrets.TARGET_EMAIL }}
-          subject: 'Repository Updates'
-          body: 'Found ${{ steps.check_updates.outputs.new_commits }} new updates in the repository.'
+          host: 'smtp.qq.com'  # qq邮箱主机
+          port: 465  # SMTP 端口，通常为465或587
+          account: ${{ secrets.EMAIL }}  # 邮箱地址，使用GitHub Secrets管理
+          password: ${{ secrets.APP_PASSWORD }}  # 邮箱密码或应用密码，使用GitHub Secrets
+          sender: GITHUB  # 发件人的名字
+          from: ${{ secrets.EMAIL }}  # 发件人的邮箱地址
+          to: ${{ secrets.TARGET_EMAIL }}  # 收件人的邮箱地址，可以用逗号分隔多个邮箱
+          subject: "Repository Updates"  # 邮件主题
+          body: "Found ${{ steps.check_updates.outputs.new_commits }} new updates in the repository."  # 邮件正文，包含更新的提交数量
