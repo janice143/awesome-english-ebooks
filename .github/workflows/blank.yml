@@ -1,0 +1,49 @@
+name: Check for Upstream Updates and Send Email
+
+on:
+  schedule:
+    - cron: '0 10 * * 0' # 每周天下午18点中国时间运行
+  workflow_dispatch: # 手动触发
+
+jobs:
+  check-updates:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1 # 只拉取最新的提交
+
+      - name: Set Upstream Repository if not exists
+        run: |
+          git remote | grep upstream || git remote add upstream https://github.com/hehonghui/awesome-english-ebooks.git
+          git fetch upstream
+
+      - name: Check for New Commits
+        id: check_updates
+        run: |
+          NEW_COMMITS=$(git rev-list HEAD..upstream/master --count)
+          echo "::set-output name=new_commits::$NEW_COMMITS"
+
+      - name: Sync with Upstream
+          if: steps.check_updates.outputs.new_commits != '0'
+          run: |
+            set -e  # 遇到错误时停止执行
+            git merge upstream/master --allow-unrelated-histories --strategy-option theirs || (echo "Merge failed, rolling back" && git merge --abort)
+            git push origin master
+
+      - name: Send Email if Updates Found
+          if: steps.check_updates.outputs.new_commits != '0'
+          uses: devellany/send-mail@v1.0.2
+          with:
+            host: 'smtp.qq.com'
+            port: 465
+            account: ${{ secrets.EMAIL }}
+            password: ${{ secrets.APP_PASSWORD }}
+            sender: GITHUB
+            from: ${{ secrets.EMAIL }}
+            to: ${{ secrets.TARGET_EMAIL }}
+            subject: "Repository Updates"
+            body: "Found ${{ steps.check_updates.outputs.new_commits }} new updates in the repository."
+          
