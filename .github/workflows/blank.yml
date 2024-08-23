@@ -46,8 +46,9 @@ jobs:
           port: 465  # SMTP 端口，通常为465或587
           account: ${{ secrets.EMAIL }}  # 邮箱地址，使用GitHub Secrets管理
           password: ${{ secrets.APP_PASSWORD }}  # 邮箱密码或应用密码，使用GitHub Secrets
-          sender: GITHUB  # 发件人的名字
+          sender: '非典型程序🦍'  # 发件人的名字
           from: ${{ secrets.EMAIL }}  # 发件人的邮箱地址
           to: ${{ secrets.TARGET_EMAIL }}  # 收件人的邮箱地址，可以用逗号分隔多个邮箱
           subject: "Repository Updates"  # 邮件主题
-          body: "Found ${{ steps.check_updates.outputs.new_commits }} new updates in the repository."  # 邮件正文，包含更新的提交数量
+          body: "Found ${{ steps.check_updates.outputs.new_commits }} new updates in the repository"  # 邮件正文，包含更新的提交数量
+          contentType: text/plain
