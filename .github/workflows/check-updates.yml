@@ -28,8 +28,9 @@ jobs:
       - name: Sync with Upstream
         if: steps.check_updates.outputs.new_commits != '0'
         run: |
-          git merge upstream/master
+          git merge upstream/master --allow-unrelated-histories
           git push origin master
+
       
       - name: Send Email if Updates Found
         if: steps.check_updates.outputs.new_commits != '0'
